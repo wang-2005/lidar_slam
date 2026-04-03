@@ -1,0 +1,25 @@
+fastlio_ICP建图方法——回环：
+打开雷达：wang@wang:~/MID360_Project/livox_ws$ ros2 launch livox_ros_driver2 msg_MID360_launch.py
+回环建图：wang@wang:~/MID360_Project/fastlio_ICP$ ros2 launch pgo pgo_launch.py
+保存地图：wang@wang:~/MID360_Project/fastlio_ICP$ ros2 service call /pgo/save_maps interface/srv/SaveMaps "{file_path: '/home/wang/MID360_Project/fastlio_ICP/PCD/map2', save_patches: true}"
+
+
+重定位启动教程：
+ 启动mid360——
+  wang@wang:~/MID360_Project/livox_ws$ ros2 launch livox_ros_driver2 msg_MID360_launch.py
+  
+  wang@wang:~/MID360_Project/fastlio_ICP$ source install/setup.bash
+  wang@wang:~/MID360_Project/fastlio_ICP$ ros2 launch localizer localizer_launch.py
+  新开终端——
+  wang@wang:~/MID360_Project/fastlio_ICP$ source install/setup.bash
+  wang@wang:~/MID360_Project/fastlio_ICP$ ros2 service call /localizer/relocalize interface/srv/Relocalize "{pcd_path: '/home/wang/MID360_Project/fastlio_ws/PCD/map4.pcd'}"
+
+  订阅话题——
+  wang@wang:~/MID360_Project/fastlio_ICP$ ros2 run tf2_ros tf2_echo map lidar
+
+	
+更新！！！
+一键启动（雷达硬件、重定位算法、实时位姿打印）：
+注意，需要使用已有的地图，在launch中更改'"{pcd_path: \'/home/wang/MID360_Project/fastlio_ws/PCD/map4.pcd\'}"'
+
+问题：在其他位置启动时，无法确定建图起点

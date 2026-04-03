@@ -1,0 +1,65 @@
+# ROS2 Workspace
+**/build/
+**/install/
+**/log/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# System
+.DS_Store
+Thumbs.db
+
+# Generated files
+**/PCD/*.pcd
+**/maps/*.pgm
+**/maps/*.yaml
+
+# Temporary files
+*.tmp
+*.temp
+
+# Library folders (if not modified)
+Livox-SDK2/
+Sophus/
+eigen/
+gtsam/
+
+# Log files
+*.log
+
+# ROS2 specific
+COLCON_IGNORE
+
+# Environment files
+.env
+
+# Python
+__pycache__/
+*.pyc
+
+# C++
+*.o
+*.so
+*.a
+
+# CMake
+CMakeCache.txt
+CMakeFiles/
+
+# Build system
+Makefile
+
+# Documentation
+*.dox
+*.pdf
+
+# Misc
+网络设置.png
+步骤
+暂时
+主要的数学库

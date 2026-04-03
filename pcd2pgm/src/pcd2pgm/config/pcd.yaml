@@ -1,0 +1,12 @@
+/pcd2pgm:
+  ros__parameters:
+    file_directory: /home/wang/MID360_Project/fastlio_ws/PCD/
+    file_name: map4
+    flag_pass_through: true
+    map_resolution: 0.05
+    map_topic_name: map
+    thre_radius: 0.3
+    thre_z_max: 0.5
+    thre_z_min: -1.0
+    thres_point_count: 15
+    use_sim_time: false

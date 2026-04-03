@@ -1,0 +1,41 @@
+# 严格按照 lio.yaml 的变量名写，数值参考 mid360 的
+imu_topic: /livox/imu
+lidar_topic: /livox/lidar
+body_frame: body
+world_frame: lidar
+print_time_cost: false
+
+lidar_filter_num: 3
+lidar_min_range: 0.5
+lidar_max_range: 100.0
+scan_resolution: 0.1
+map_resolution: 0.2
+
+cube_len: 1000
+det_range: 100.0
+move_thresh: 1.5
+
+# 噪声参数，用 mid360 的
+na: 0.1
+ng: 0.1
+nba: 0.0001
+nbg: 0.0001
+
+imu_init_num: 20
+near_search_num: 5
+ieskf_max_iter: 3
+
+# 外参，用 mid360.yaml 里的数值替换
+gravity_align: true
+esti_il: true
+r_il: [1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0]
+t_il: [-0.011, -0.02329, 0.04412]
+
+lidar_cov_inv: 1000.0
+
+
+
+
+# 补上你想要的保存功能（如果节点代码支持的话）
+pcd_save_en: true
+map_save_path: "/home/wang/MID360_Project/fastlio_ICP/PCD/map.pcd"

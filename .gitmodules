@@ -1,0 +1,15 @@
+[submodule "Localization/src/FAST_LIO_LOCALIZATION_ROS2"]
+	path = Localization/src/FAST_LIO_LOCALIZATION_ROS2
+	url = https://github.com/wh20072004/FAST-LIO-Localization-ROS2.git
+[submodule "control/src/serial-ros2"]
+	path = control/src/serial-ros2
+	url = https://github.com/RoverRobotics/serial_ros2.git
+[submodule "fastlio_sam_ws/src/FAST_LIO_SAM_ROS2"]
+	path = fastlio_sam_ws/src/FAST_LIO_SAM_ROS2
+	url = https://github.com/gisbi-kim/FAST-LIO-SAM-ROS2.git
+[submodule "fastlio_ws/src/FAST_LIO"]
+	path = fastlio_ws/src/FAST_LIO
+	url = https://github.com/hku-mars/FAST-LIO2.git
+[submodule "livox_ws/src/livox_ros_driver2"]
+	path = livox_ws/src/livox_ros_driver2
+	url = https://github.com/Livox-SDK/livox_ros_driver2.git
