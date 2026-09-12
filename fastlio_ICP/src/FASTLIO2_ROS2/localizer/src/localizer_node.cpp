@@ -114,7 +114,9 @@ public:
 
         if (!update_tf)
         {
-            sendBroadCastTF(m_state.last_message_time);
+            // A loaded map is not yet a valid localization result.
+            if (m_state.localize_success)
+                sendBroadCastTF(m_state.last_message_time);
             return;
         }
 
@@ -159,7 +161,8 @@ public:
                 m_state.service_received = false;
             }
         }
-        sendBroadCastTF(current_time);
+        if (m_state.localize_success)
+            sendBroadCastTF(current_time);
         publishMapCloud(current_time);
     }
     void syncCB(const sensor_msgs::msg::PointCloud2::ConstSharedPtr &cloud_msg, const nav_msgs::msg::Odometry::ConstSharedPtr &odom_msg)
@@ -240,7 +243,7 @@ public:
         }
 
         response->success = true;
-        response->message = "relocalize success";
+        response->message = "map loaded; ICP alignment pending (check /localizer/relocalize_check)";
         return;
     }
 

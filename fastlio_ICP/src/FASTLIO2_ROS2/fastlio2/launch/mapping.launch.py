@@ -1,5 +1,4 @@
 import os
-from datetime import datetime
 from ament_index_python.packages import get_package_share_directory
 from launch import LaunchDescription
 from launch_ros.actions import Node
@@ -7,16 +6,8 @@ from launch.substitutions import PathJoinSubstitution
 from launch_ros.substitutions import FindPackageShare
 
 def generate_launch_description():
-    # 1. 定义地图保存目录 (改为你现在的 ICP 项目路径)
-    pcd_save_dir = "/home/wang/MID360_Project/fastlio_ICP/PCD"
-    if not os.path.exists(pcd_save_dir):
-        os.makedirs(pcd_save_dir)
-
-    # 2. 生成唯一文件名
-    now = datetime.now().strftime("%Y%m%d_%H%M%S")
-    unique_map_path = os.path.join(pcd_save_dir, f"map_{now}.pcd")
-
-    # 3. 获取配置路径
+    # FAST-LIO2 publishes odometry and point clouds. Save loop-optimized
+    # maps through the PGO /pgo/save_maps service instead.
     # 注意：这里 FindPackageShare 找的是你现在的包名 fastlio2
     package_path = get_package_share_directory('fastlio2')
     rviz_cfg = os.path.join(package_path, 'rviz', 'fastlio2.rviz')

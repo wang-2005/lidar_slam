@@ -36,6 +36,5 @@ lidar_cov_inv: 1000.0
 
 
 
-# 补上你想要的保存功能（如果节点代码支持的话）
-pcd_save_en: true
-map_save_path: "/home/wang/MID360_Project/fastlio_ICP/PCD/map.pcd"
+# Save an optimized map through /pgo/save_maps; lio_node does not read
+# pcd_save_en or map_save_path parameters.

@@ -12,7 +12,7 @@ def generate_launch_description():
     )
 
     lio_config_path = PathJoinSubstitution(
-        [FindPackageShare("fastlio2"), "config", "lio.yaml"]
+        [FindPackageShare("fastlio2"), "config", "mid360.yaml"]
     )
 
 

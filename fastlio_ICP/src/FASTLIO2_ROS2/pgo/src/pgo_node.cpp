@@ -12,6 +12,7 @@
 #include <visualization_msgs/msg/marker.hpp>
 #include <queue>
 #include <filesystem>
+#include <limits>
 #include "pgos/commons.h"
 #include "pgos/simple_pgo.h"
 #include "interface/srv/save_maps.hpp"
@@ -33,7 +34,7 @@ struct NodeState
 {
     std::mutex message_mutex;
     std::queue<CloudWithPose> cloud_buffer;
-    double last_message_time;
+    double last_message_time = -std::numeric_limits<double>::infinity();
 };
 
 class PGONode : public rclcpp::Node
@@ -190,12 +191,13 @@ public:
 
     void timerCB()
     {
-        if (m_state.cloud_buffer.size() == 0)
-            return;
-        CloudWithPose cp = m_state.cloud_buffer.front();
-        // 清理队列
+        CloudWithPose cp;
         {
             std::lock_guard<std::mutex>(m_state.message_mutex);
+            if (m_state.cloud_buffer.empty())
+                return;
+            // Process the newest synchronized cloud/odom pair, not a stale first pair.
+            cp = m_state.cloud_buffer.back();
             while (!m_state.cloud_buffer.empty())
             {
                 m_state.cloud_buffer.pop();
@@ -222,10 +224,11 @@ public:
 
     void saveMapsCB(const std::shared_ptr<interface::srv::SaveMaps::Request> request, std::shared_ptr<interface::srv::SaveMaps::Response> response)
     {
-        if (!std::filesystem::exists(request->file_path))
+        std::filesystem::path p_dir(request->file_path);
+        if (request->file_path.empty())
         {
             response->success = false;
-            response->message = request->file_path + " IS NOT EXISTS!";
+            response->message = "output directory is empty";
             return;
         }
 
@@ -236,29 +239,51 @@ public:
             return;
         }
 
-        std::filesystem::path p_dir(request->file_path);
+        // Never silently replace an existing map or delete its patches.
+        std::error_code fs_error;
+        if (std::filesystem::exists(p_dir, fs_error) &&
+            (!std::filesystem::is_directory(p_dir, fs_error) || !std::filesystem::is_empty(p_dir, fs_error)))
+        {
+            response->success = false;
+            response->message = "output directory must be empty: " + p_dir.string();
+            return;
+        }
+        std::filesystem::create_directories(p_dir, fs_error);
+        if (fs_error)
+        {
+            response->success = false;
+            response->message = "cannot create output directory: " + fs_error.message();
+            return;
+        }
+
         std::filesystem::path patches_dir = p_dir / "patches";
         std::filesystem::path poses_txt_path = p_dir / "poses.txt";
         std::filesystem::path map_path = p_dir / "map.pcd";
 
         if (request->save_patches)
         {
-            if (std::filesystem::exists(patches_dir))
+            std::filesystem::create_directories(patches_dir, fs_error);
+            if (fs_error)
             {
-                std::filesystem::remove_all(patches_dir);
-            }
-
-            std::filesystem::create_directories(patches_dir);
-
-            if (std::filesystem::exists(poses_txt_path))
-            {
-                std::filesystem::remove(poses_txt_path);
+                response->success = false;
+                response->message = "cannot create patches directory: " + fs_error.message();
+                return;
             }
             RCLCPP_INFO(this->get_logger(), "Patches Path: %s", patches_dir.string().c_str());
         }
         RCLCPP_INFO(this->get_logger(), "SAVE MAP TO %s", map_path.string().c_str());
 
-        std::ofstream txt_file(poses_txt_path);
+        std::ofstream txt_file;
+        if (request->save_patches)
+        {
+            txt_file.open(poses_txt_path);
+            if (!txt_file)
+            {
+                response->success = false;
+                response->message = "cannot open poses file: " + poses_txt_path.string();
+                return;
+            }
+        }
 
         CloudType::Ptr ret(new CloudType);
         for (size_t i = 0; i < m_pgo->keyPoses().size(); i++)
@@ -269,7 +294,12 @@ public:
             {
                 std::string patch_name = std::to_string(i) + ".pcd";
                 std::filesystem::path patch_path = patches_dir / patch_name;
-                pcl::io::savePCDFileBinary(patch_path.string(), *body_cloud);
+                if (pcl::io::savePCDFileBinary(patch_path.string(), *body_cloud) != 0)
+                {
+                    response->success = false;
+                    response->message = "failed to save patch: " + patch_path.string();
+                    return;
+                }
                 Eigen::Quaterniond q(m_pgo->keyPoses()[i].r_global);
                 V3D t = m_pgo->keyPoses()[i].t_global;
                 txt_file << patch_name << " " << t.x() << " " << t.y() << " " << t.z() << " " << q.w() << " " << q.x() << " " << q.y() << " " << q.z() << std::endl;
@@ -278,8 +308,19 @@ public:
             pcl::transformPointCloud(*body_cloud, *world_cloud, m_pgo->keyPoses()[i].t_global, Eigen::Quaterniond(m_pgo->keyPoses()[i].r_global));
             *ret += *world_cloud;
         }
+        if (request->save_patches && !txt_file.good())
+        {
+            response->success = false;
+            response->message = "failed to write poses file: " + poses_txt_path.string();
+            return;
+        }
         txt_file.close();
-        pcl::io::savePCDFileBinary(map_path.string(), *ret);
+        if (pcl::io::savePCDFileBinary(map_path.string(), *ret) != 0)
+        {
+            response->success = false;
+            response->message = "failed to save map: " + map_path.string();
+            return;
+        }
         response->success = true;
         response->message = "SAVE SUCCESS!";
     }
