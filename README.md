@@ -77,9 +77,6 @@ ros2 run tf2_ros tf2_echo map body
 
 `/localizer/relocalize` 返回成功仅表示地图已加载、对齐请求已接受；以 `relocalize_check` 的 `valid: true` 及 TF 输出确认 ICP 实际收敛。初值 `x/y/z/yaw/pitch/roll` 应接近机器人在地图中的真实初始位姿，均以米/弧度表示；局部 ICP 不保证从任意远的初值完成全局搜索。
 
-## 验证边界
-
-本分支的静态检查覆盖启动拓扑、配置话题/坐标系和 Python 语法。**尚未在本机完成 ROS 2 编译、Mid-360 实机运行或导航闭环测试**；因此不声明厘米级定位精度、回环优化幅度或 Nav2 自主导航成功。实机验收建议留存 rosbag、回环前后轨迹/地图、重定位成功率与耗时、TF 树和终端日志。旧的 `fastlio_ws/src/start/qidong.launch.py` 是 FAST-LIO + AMCL/Nav2 定位实验入口，不属于上述 ICP/PGO 一体建图链路。
 
 ## 上游与许可
 
